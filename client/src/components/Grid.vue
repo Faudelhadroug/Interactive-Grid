@@ -360,7 +360,7 @@ function handleCellEndMove(cellMoved: HTMLElement, targetCell: HTMLElement) {
       A* search algo
     </button>
   </div>
-  <div class="bg-red-200 select-none p-[0.5rem] md:p-[3rem]" @touchstart="holdingTouch = true" @touchend="holdingTouch = false" @mouseup="holdingTouch = false" @mousedown="holdingTouch = true">
+  <div class="bg-red-200 h-screen select-none p-[0.5rem] md:p-[3rem]" @touchstart="holdingTouch = true" @touchend="holdingTouch = false" @mouseup="holdingTouch = false" @mousedown="holdingTouch = true">
     <p class="text-center underline text-3xl pb-[1rem]">
       This project is still in developement and is subject to change (Preferably use a desktop)
     </p>
