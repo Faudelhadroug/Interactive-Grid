@@ -1,3 +1,32 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+* {
+  /* Include padding and border in size calculation */
+  box-sizing: border-box;
+  /* Position based on immediate parent and allow adjusting top/right/bottom/left */
+  position: relative;
+  /* Prevent grid and flex items from spilling out of their container */
+  min-width: 0;
+}
+
+#app {
+  /* Ensure that the body fills the entire viewport */
+  min-height: 100dvh;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  /* Balance headings across multiple lines into an even block */
+  text-wrap: balance;
+}
+
+p {
+  /* prevent text orphans (single word on last line) */
+  text-wrap: pretty;
+}
