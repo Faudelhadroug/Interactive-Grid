@@ -153,6 +153,7 @@ async function aStarAlgo() {
     }
   }
   // No solution
+  // eslint-disable-next-line no-alert
   alert('0 path possible')
   return []
 }
