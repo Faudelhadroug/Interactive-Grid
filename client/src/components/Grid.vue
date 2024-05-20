@@ -76,7 +76,7 @@ function aStarAlgoInit() {
       updateNeighbors(grid.value[i][j])
   }
 
-  for(let i = 0; i < cellsWithWall.length; i++){
+  for (let i = 0; i < cellsWithWall.length; i++) {
     const rowWallNb = Number.parseInt(cellsWithWall[i].id.split('-')[0])
     const columnWallNb = Number.parseInt(cellsWithWall[i].id.split('-')[1])
     grid.value[rowWallNb][columnWallNb].available = false
@@ -84,10 +84,8 @@ function aStarAlgoInit() {
   const rowNb = Number.parseInt(cellStart.value!.id.split('-')[0])
   const columnNb = Number.parseInt(cellStart.value!.id.split('-')[1])
   const start: GridPoint = grid.value[rowNb][columnNb]
-  console.log(start)
   openSet.value = []
   openSet.value.push(start)
-  console.log(openSet.value)
   closedSet.value = []
   path.value = []
 }
@@ -113,13 +111,13 @@ async function aStarAlgo() {
         temp = temp.parent
       }
       path.value.reverse()
-      console.log('Success')
       function markCellsVisited(i: number) {
         if (i < path.value.length - 1) {
           const tempRow = path.value[i].x
           const tempColumn = path.value[i].y
           const calculCell = tempColumn + (columns * (tempRow))
-          cells.value[calculCell].classList.add('visited')
+          const actualCell: HTMLElement = cells.value[calculCell]
+          actualCell.classList.add('visited')
           cellsVisited.push(cells.value[calculCell])
           setTimeout(() => {
             markCellsVisited(i + 1)
@@ -224,13 +222,13 @@ function changeClassWall(row: number, column: number) {
     return
   if (element.className.includes('wall')) {
     element.classList.remove('wall')
-    //grid.value[row - 1][column - 1].available = true
+    // grid.value[row - 1][column - 1].available = true
     cellsWithWall.splice(cellsWithWall.findIndex(el => el.id === element.id), 1)
     // cellsAvailable.push(element)
     return
   }
   element.classList.add('wall')
-  //grid.value[row - 1][column - 1].available = false
+  // grid.value[row - 1][column - 1].available = false
   cellsWithWall.push(element)
   // cellsAvailable.splice(cellsAvailable.findIndex(el => el.id === element.id), 1)
 }
@@ -243,7 +241,7 @@ function clearWall() {
   const totalWall = cellsWithWall.length
   for (let i = totalWall - 1; i > -1; i--) {
     cellsWithWall[i].classList.remove('wall')
-    //grid.value[Number.parseInt(cellsWithWall[i].id.split('-')[0])][Number.parseInt(cellsWithWall[i].id.split('-')[1])].available = true
+    // grid.value[Number.parseInt(cellsWithWall[i].id.split('-')[0])][Number.parseInt(cellsWithWall[i].id.split('-')[1])].available = true
     // cellsAvailable.push(cellsWithWall[i])
     cellsWithWall.splice(i, 1)
   }
@@ -362,12 +360,22 @@ function handleCellEndMove(cellMoved: HTMLElement, targetCell: HTMLElement) {
     </button>
   </div>
   <div class="bg-red-200 select-none p-[0.5rem] md:p-[3rem]" @touchstart="holdingTouch = true" @touchend="holdingTouch = false" @mouseup="holdingTouch = false" @mousedown="holdingTouch = true">
-    <p class="text-center underline text-3xl pb-[1rem]">This project is still in developement and is subject to change (Preferably use a desktop)</p>
+    <p class="text-center underline text-3xl pb-[1rem]">
+      This project is still in developement and is subject to change (Preferably use a desktop)
+    </p>
     <div class="flex justify-center space-x-[2rem] pb-[1rem]">
-      <p class="flex items-center">Start <span class="start w-4 h-4 inline-block ml-1"></span></p>
-      <p class="flex items-center">End <span class="end w-4 h-4 inline-block ml-1"></span></p>
-      <p class="flex items-center">Wall <span class="wall w-4 h-4 inline-block ml-1"></span></p>
-      <p class="flex items-center">Visited  <span class="visited w-4 h-4 inline-block ml-1"></span></p>
+      <p class="flex items-center">
+        Start <span class="start w-4 h-4 inline-block ml-1" />
+      </p>
+      <p class="flex items-center">
+        End <span class="end w-4 h-4 inline-block ml-1" />
+      </p>
+      <p class="flex items-center">
+        Wall <span class="wall w-4 h-4 inline-block ml-1" />
+      </p>
+      <p class="flex items-center">
+        Visited  <span class="visited w-4 h-4 inline-block ml-1" />
+      </p>
     </div>
     <table class="flex justify-center flex-nowrap">
       <tbody>
