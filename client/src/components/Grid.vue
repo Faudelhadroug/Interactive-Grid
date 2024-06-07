@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { ref,
-  //isRef, watch,
-  onMounted,
-computed, 
-} from 'vue'
-import type { Ref, ComputedRef } from 'vue'
+  // isRef, watch,
+  onMounted, computed } from 'vue'
+import type { ComputedRef, Ref } from 'vue'
 import {
   useGridInformations,
   useChangeClassWall,
@@ -33,7 +31,6 @@ interface Node {
   h: number
 }
 
-
 const cells = ref()
 const { rows, columns, graph, baseCellStart, baseCellEnd } = useGridInformations(cells)
 const cellStartRow: Ref<number> = ref(1)
@@ -56,25 +53,27 @@ const endNode: ComputedRef<Node> = computed(() => {
 })
 
 const path: Ref<Node[] | []> = ref([])
-//const visited: Ref<Node[] | []> = ref([])
+// const visited: Ref<Node[] | []> = ref([])
 function animationPath(): Promise<void> {
   return new Promise((resolve) => {
     function markCellsPath(i: number) {
-    if (i < path.value.length - 1) {
-      path.value[i].htmlNode.classList.add('path')
-      setTimeout(() => {
-        markCellsPath(i + 1)
-      }, 50)
-    } else {
-      resolve();
+      if (i < path.value.length - 1) {
+        path.value[i].htmlNode.classList.add('path')
+        setTimeout(() => {
+          markCellsPath(i + 1)
+        }, 50)
+      }
+      else {
+        resolve()
+      }
     }
-  }
-  markCellsPath(1)
+    markCellsPath(1)
   })
 }
 
 function clearVisited() {
-  if(blockUserAction.value) return
+  if (blockUserAction.value)
+    return
   const totalVisited = path.value.length
   if (totalVisited > 0) {
     for (let i = totalVisited - 1; i > -1; i--) {
@@ -88,10 +87,10 @@ function clearVisited() {
 const holdingTouch = ref(false)
 const blockUserAction = ref(false)
 
-async function startSearchAlgo(algo: string){
+async function startSearchAlgo(algo: string) {
   clearVisited()
   blockUserAction.value = true
-  switch(algo){
+  switch (algo) {
     case 'aStar':
       try {
         path.value = await aStarAlgo({
@@ -99,12 +98,14 @@ async function startSearchAlgo(algo: string){
           columns,
           grid: graph,
           start: startNode.value,
-          end: endNode.value
+          end: endNode.value,
         })
         await animationPath()
-      } catch (error) {
+      }
+      catch (error) {
         console.error(error)
-      } finally {
+      }
+      finally {
         blockUserAction.value = false
       }
 
@@ -182,15 +183,15 @@ function useHandleDragging() {
     cellEndColumn.value = targetInfos.column
   }
 
-  function changeStateStartEnd(cellMoved: Node, targetCell: Node){
-      targetCell.isStart = true
-      targetCell.isEnd = false
-      cellMoved.isStart = false
-      cellMoved.isEnd = true
-      cellStartRow.value = targetCell.row
-      cellStartColumn.value = targetCell.col
-      cellEndRow.value = cellMoved.row
-      cellEndColumn.value = cellMoved.col
+  function changeStateStartEnd(cellMoved: Node, targetCell: Node) {
+    targetCell.isStart = true
+    targetCell.isEnd = false
+    cellMoved.isStart = false
+    cellMoved.isEnd = true
+    cellStartRow.value = targetCell.row
+    cellStartColumn.value = targetCell.col
+    cellEndRow.value = cellMoved.row
+    cellEndColumn.value = cellMoved.col
   }
 
   return {
@@ -198,7 +199,6 @@ function useHandleDragging() {
     handleDrop,
   }
 }
-
 </script>
 
 <template>
@@ -211,12 +211,12 @@ function useHandleDragging() {
     </button>
     <button @click="clearVisited()">
       Clear visited path
-    </button> 
+    </button>
 
     <!-- <button @click="randomizeStartAndEnd()">
       Randomize start and end
     </button> -->
-    <!-- 
+    <!--
     <button @click="dijkstraAlgo()">
       Dijkstra algo
     </button>
@@ -249,7 +249,7 @@ function useHandleDragging() {
           class="outline outline-1 w-[70px] md:w-[30px] h-[25px] md:h-[30px]"
           :draggable="graph.length > 0 ? graph[row - 1][column - 1].isStart || graph[row - 1][column - 1].isEnd ? true : false : false"
           @mousedown="blockUserAction ? null : useChangeClassWall(row - 1, column - 1)"
-          @mouseover="blockUserAction ? null :useHandleClickHolding(row - 1, column - 1, holdingTouch)"
+          @mouseover="blockUserAction ? null : useHandleClickHolding(row - 1, column - 1, holdingTouch)"
           @dragstart="blockUserAction ? null : handleDragStart($event, row - 1, column - 1)"
           @drop="blockUserAction ? null : handleDrop($event, row - 1, column - 1)"
           @dragover.prevent

@@ -1,5 +1,6 @@
 import { onMounted, ref } from 'vue'
 import type { Ref } from 'vue'
+
 interface CreateNode { row: number, col: number, isWall: boolean, htmlNode: HTMLElement, isStart: boolean, isEnd: boolean }
 interface Node {
   row: number

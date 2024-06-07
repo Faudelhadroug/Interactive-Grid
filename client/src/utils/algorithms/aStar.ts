@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { type Ref } from 'vue'
+import type { Ref } from 'vue'
 
 interface Node {
   row: number
@@ -44,13 +44,13 @@ function updateNeighbors(node: Node, rows: number, columns: number, grid: Ref<No
 }
 
 interface aStarArgs {
-  rows: number;
-  columns: number;
-  grid: Ref<Node[][]>;
-  start: Node;
-  end: Node;
+  rows: number
+  columns: number
+  grid: Ref<Node[][]>
+  start: Node
+  end: Node
 }
-export default async function aStarAlgo({rows, columns, grid, start, end} : aStarArgs): Promise<Node[]> {
+export default async function aStarAlgo({ rows, columns, grid, start, end }: aStarArgs): Promise<Node[]> {
   //* A star base used https://dev.to/codesphere/pathfinding-with-javascript-the-a-algorithm-3jlb
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < columns; j++)

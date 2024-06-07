@@ -3,7 +3,6 @@
 
 <template>
   <div>
-
     <div class="bg-red-200 select-none p-[0.5rem] md:p-[3rem]">
       <p class="text-center underline text-3xl pb-[1rem]">
         This project is still in developement and is subject to change (Preferably use a desktop)
