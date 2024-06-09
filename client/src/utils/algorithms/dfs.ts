@@ -1,7 +1,6 @@
-import type { Node, dfsArgs,  } from '../interface'
+import type { Node, dfsArgs } from '../interface'
 
 export default function dfsAlgo({ grid, startNode, endNode }: dfsArgs): any {
-
   const stack = [startNode]
   const visitedSet = new Set()
   const result: Node[] = []
@@ -9,7 +8,7 @@ export default function dfsAlgo({ grid, startNode, endNode }: dfsArgs): any {
   while (stack.length) {
     const vertex = stack.pop()
     if (!visitedSet.has(vertex) && vertex?.isWall === false) {
-      if(neighborsStart.includes(vertex))
+      if (neighborsStart.includes(vertex))
         result.length = 1
       visitedSet.add(vertex)
       result.push(vertex)
@@ -19,9 +18,8 @@ export default function dfsAlgo({ grid, startNode, endNode }: dfsArgs): any {
       for (const neighbor of neighbors)
         stack.push(neighbor)
     }
-    if (stack.length === 0 && !vertex?.isEnd) {
+    if (stack.length === 0 && !vertex?.isEnd)
       return { shortest: [], allVisited: Array.from(visitedSet) }
-    }
   }
 
   return { shortest: result, allVisited: Array.from(visitedSet) }

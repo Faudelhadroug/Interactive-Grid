@@ -25,7 +25,7 @@ export default function dijkstraAlgo({ grid, startNode, endNode }: dijkstraArgs)
     nodesInShortestPathOrder.unshift(currentNode)
     currentNode = currentNode.previousNode!
   }
-  return { shortest: nodesInShortestPathOrder[nodesInShortestPathOrder.length - 1].isEnd && nodesInShortestPathOrder.length < 2 ? [] : nodesInShortestPathOrder , allVisited: visitedNodesInOrder }
+  return { shortest: nodesInShortestPathOrder[nodesInShortestPathOrder.length - 1].isEnd && nodesInShortestPathOrder.length < 2 ? [] : nodesInShortestPathOrder, allVisited: visitedNodesInOrder }
 }
 
 function getAllNodes(tempGrid: Node[][]) {

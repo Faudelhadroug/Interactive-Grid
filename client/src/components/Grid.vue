@@ -209,7 +209,8 @@ function useHandleDragging() {
   }
 }
 async function startSearchAlgo(algo: string) {
-  if(blockUserAction.value) return
+  if (blockUserAction.value)
+    return
   clearForcePathAndVisited()
   blockUserAction.value = true
   switch (algo) {
@@ -223,7 +224,8 @@ async function startSearchAlgo(algo: string) {
           end: endNode.value,
         })
         await animationPath()
-        if(path.value.length === 0) alert('no path possible')
+        if (path.value.length === 0)
+          alert('no path possible')
       }
       catch (error) {
         console.error(error)
@@ -241,7 +243,8 @@ async function startSearchAlgo(algo: string) {
         await animationVisited()
         await animationPath()
         console.log(shortest)
-        if(shortest.length === 0) alert('no path possible')
+        if (shortest.length === 0)
+          alert('no path possible')
         resetGraphAfterDijkstra()
       }
       catch (error) {
@@ -249,7 +252,7 @@ async function startSearchAlgo(algo: string) {
       }
       break
     case 'dfs':
-    try {
+      try {
         const { shortest, allVisited } = dfsAlgo({
           grid: graph.value,
           startNode: startNode.value,
@@ -259,8 +262,9 @@ async function startSearchAlgo(algo: string) {
         visited.value = allVisited
         await animationVisited()
         await animationPath()
-        if(shortest.length === 0) alert('no path possible')
-        //resetGraphAfterDijkstra()
+        if (shortest.length === 0)
+          alert('no path possible')
+        // resetGraphAfterDijkstra()
       }
       catch (error) {
         console.error(error)
