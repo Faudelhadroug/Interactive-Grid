@@ -3,7 +3,7 @@ import type { Node, dijkstraArgs } from '../interface'
 export default function dijkstraAlgo({ grid, startNode, endNode }: dijkstraArgs) {
   const unvisitedNodes: Node[] = getAllNodes(grid)
   startNode.distance = 0
-  const visitedNodesInOrder: any = []
+  const visitedNodesInOrder: Node[] = []
   while (unvisitedNodes.length) {
     sortNodesByDistance(unvisitedNodes)
     const closestNode = unvisitedNodes.shift()!
@@ -25,7 +25,7 @@ export default function dijkstraAlgo({ grid, startNode, endNode }: dijkstraArgs)
     nodesInShortestPathOrder.unshift(currentNode)
     currentNode = currentNode.previousNode!
   }
-  return { shortest: nodesInShortestPathOrder, allVisited: visitedNodesInOrder }
+  return { shortest: nodesInShortestPathOrder[nodesInShortestPathOrder.length - 1].isEnd && nodesInShortestPathOrder.length < 2 ? [] : nodesInShortestPathOrder , allVisited: visitedNodesInOrder }
 }
 
 function getAllNodes(tempGrid: Node[][]) {
