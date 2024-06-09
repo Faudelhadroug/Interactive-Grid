@@ -12,6 +12,7 @@ import { inverseClassName, transfertClassName } from '../utils/handleClassName'
 import type { Node } from '../utils/interface'
 import aStarAlgo from '../utils/algorithms/aStar.ts'
 import dijkstraAlgo from '../utils/algorithms/dijkstra.ts'
+import dfsAlgo from '../utils/algorithms/dfs'
 
 const cells = ref()
 const { rows, columns, graph, baseCellStart, baseCellEnd } = useGridInformations(cells)
@@ -49,7 +50,7 @@ function useAnimation() {
           path.value[i].htmlNode.classList.add('path')
           setTimeout(() => {
             markCellsPath(i + 1)
-          }, 50)
+          }, 25)
         }
         else {
           resolve()
@@ -208,6 +209,7 @@ function useHandleDragging() {
   }
 }
 async function startSearchAlgo(algo: string) {
+  if(blockUserAction.value) return
   clearForcePathAndVisited()
   blockUserAction.value = true
   switch (algo) {
@@ -221,6 +223,7 @@ async function startSearchAlgo(algo: string) {
           end: endNode.value,
         })
         await animationPath()
+        if(path.value.length === 0) alert('no path possible')
       }
       catch (error) {
         console.error(error)
@@ -237,10 +240,30 @@ async function startSearchAlgo(algo: string) {
         visited.value = allVisited
         await animationVisited()
         await animationPath()
+        console.log(shortest)
+        if(shortest.length === 0) alert('no path possible')
         resetGraphAfterDijkstra()
       }
       catch (error) {
-
+        console.error(error)
+      }
+      break
+    case 'dfs':
+    try {
+        const { shortest, allVisited } = dfsAlgo({
+          grid: graph.value,
+          startNode: startNode.value,
+          endNode: endNode.value,
+        })
+        path.value = shortest
+        visited.value = allVisited
+        await animationVisited()
+        await animationPath()
+        if(shortest.length === 0) alert('no path possible')
+        //resetGraphAfterDijkstra()
+      }
+      catch (error) {
+        console.error(error)
       }
       break
   }
@@ -271,6 +294,9 @@ function resetGraphAfterDijkstra() {
     </button>
     <button @click="startSearchAlgo('dijkstra')">
       Dijkstra Algo
+    </button>
+    <button @click="startSearchAlgo('dfs')">
+      DFS algo
     </button>
     <button @click="clearPathAndVisited()">
       Clear visited path
