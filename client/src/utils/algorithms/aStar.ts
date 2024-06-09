@@ -4,7 +4,7 @@ import type { Node, aStarArgs } from '../interface'
 
 const openSet: Ref<Node[]> = ref([])
 const closedSet: Ref<Node[]> = ref([])
-const path: Ref<Node[]> = ref([])
+const result: Ref<Node[]> = ref([])
 
 function heuristic(firstPosition: Node, secondPosition: Node) {
   const d1 = Math.abs(secondPosition.row - firstPosition.row)
@@ -35,7 +35,7 @@ export default async function aStarAlgo({ rows, columns, grid, start, end }: aSt
   openSet.value = []
   openSet.value.push(start)
   closedSet.value = []
-  path.value = []
+  result.value = []
 
   while (openSet.value.length > 0) {
     let lowestIndex = 0
@@ -46,12 +46,12 @@ export default async function aStarAlgo({ rows, columns, grid, start, end }: aSt
     const current = openSet.value[lowestIndex]
     if (current === end) {
       let temp = current
-      path.value.push(temp)
+      result.value.push(temp)
       while (temp.parent !== undefined) {
-        path.value.push(temp.parent)
+        result.value.push(temp.parent)
         temp = temp.parent
       }
-      return path.value.reverse()
+      return result.value.reverse()
     }
 
     openSet.value.splice(lowestIndex, 1)
@@ -79,7 +79,5 @@ export default async function aStarAlgo({ rows, columns, grid, start, end }: aSt
     }
   }
   // No solution
-  // eslint-disable-next-line no-alert
-  alert('0 path possible')
   return []
 }
