@@ -1,22 +1,6 @@
 import { ref } from 'vue'
 import type { Ref } from 'vue'
-
-interface Node {
-  row: number
-  col: number
-  htmlNode: HTMLElement
-  isStart: boolean
-  isEnd: boolean
-  isWall: boolean
-  isVisited: boolean
-  distance: number
-  neighbors: Node[]
-  previousNode?: null | Node[]
-  parent?: Node
-  f: number
-  g: number
-  h: number
-}
+import type { Node, aStarArgs } from '../interface'
 
 const openSet: Ref<Node[]> = ref([])
 const closedSet: Ref<Node[]> = ref([])
@@ -41,14 +25,6 @@ function updateNeighbors(node: Node, rows: number, columns: number, grid: Ref<No
 
   if (col > 0)
     node.neighbors.push(grid.value[row][col - 1])
-}
-
-interface aStarArgs {
-  rows: number
-  columns: number
-  grid: Ref<Node[][]>
-  start: Node
-  end: Node
 }
 export default async function aStarAlgo({ rows, columns, grid, start, end }: aStarArgs): Promise<Node[]> {
   //* A star base used https://dev.to/codesphere/pathfinding-with-javascript-the-a-algorithm-3jlb

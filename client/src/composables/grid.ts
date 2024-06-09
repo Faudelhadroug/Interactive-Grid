@@ -1,23 +1,6 @@
 import { onMounted, ref } from 'vue'
 import type { Ref } from 'vue'
-
-interface CreateNode { row: number, col: number, isWall: boolean, htmlNode: HTMLElement, isStart: boolean, isEnd: boolean }
-interface Node {
-  row: number
-  col: number
-  htmlNode: HTMLElement
-  isStart: boolean
-  isEnd: boolean
-  isWall: boolean
-  isVisited: boolean
-  distance: number
-  neighbors: Node[]
-  previousNode?: null | Node[]
-  parent?: Node
-  f: number
-  g: number
-  h: number
-}
+import type { CreateNode, Node } from '../utils/interface'
 
 const rows: number = 20
 const columns: number = 40

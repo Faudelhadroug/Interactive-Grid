@@ -1,35 +1,17 @@
 <script setup lang="ts">
-import { ref,
-  // isRef, watch,
-  onMounted, computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import type { ComputedRef, Ref } from 'vue'
 import {
-  useGridInformations,
   useChangeClassWall,
-  useHandleClickHolding,
-  // useCalculCell,
-  useReplaceWallClassName,
   useClearWall,
+  useGridInformations,
+  useHandleClickHolding,
+  useReplaceWallClassName,
 } from '../composables/grid.ts'
 import { inverseClassName, transfertClassName } from '../utils/handleClassName'
+import type { Node } from '../utils/interface'
 import aStarAlgo from '../utils/algorithms/aStar.ts'
-
-interface Node {
-  row: number
-  col: number
-  htmlNode: HTMLElement
-  isStart: boolean
-  isEnd: boolean
-  isWall: boolean
-  isVisited: boolean
-  distance: number
-  neighbors: Node[]
-  previousNode?: null | Node[]
-  parent?: Node
-  f: number
-  g: number
-  h: number
-}
+import dijkstraAlgo from '../utils/algorithms/dijkstra.ts'
 
 const cells = ref()
 const { rows, columns, graph, baseCellStart, baseCellEnd } = useGridInformations(cells)
@@ -53,63 +35,90 @@ const endNode: ComputedRef<Node> = computed(() => {
 })
 
 const path: Ref<Node[] | []> = ref([])
-// const visited: Ref<Node[] | []> = ref([])
-function animationPath(): Promise<void> {
-  return new Promise((resolve) => {
-    function markCellsPath(i: number) {
-      if (i < path.value.length - 1) {
-        path.value[i].htmlNode.classList.add('path')
-        setTimeout(() => {
-          markCellsPath(i + 1)
-        }, 50)
-      }
-      else {
-        resolve()
-      }
-    }
-    markCellsPath(1)
-  })
-}
-
-function clearVisited() {
-  if (blockUserAction.value)
-    return
-  const totalVisited = path.value.length
-  if (totalVisited > 0) {
-    for (let i = totalVisited - 1; i > -1; i--) {
-      path.value[i].htmlNode.classList.remove('visited')
-      path.value[i].htmlNode.classList.remove('path')
-      path.value.splice(i, 1)
-    }
-  }
-}
+const visited: Ref<Node[] | []> = ref([])
 
 const holdingTouch = ref(false)
 const blockUserAction = ref(false)
 
-async function startSearchAlgo(algo: string) {
-  clearVisited()
-  blockUserAction.value = true
-  switch (algo) {
-    case 'aStar':
-      try {
-        path.value = await aStarAlgo({
-          rows,
-          columns,
-          grid: graph,
-          start: startNode.value,
-          end: endNode.value,
-        })
-        await animationPath()
+const { animationPath, animationVisited } = useAnimation()
+function useAnimation() {
+  function animationPath(): Promise<void> {
+    return new Promise((resolve) => {
+      function markCellsPath(i: number) {
+        if (i < path.value.length - 1) {
+          path.value[i].htmlNode.classList.add('path')
+          setTimeout(() => {
+            markCellsPath(i + 1)
+          }, 50)
+        }
+        else {
+          resolve()
+        }
       }
-      catch (error) {
-        console.error(error)
-      }
-      finally {
-        blockUserAction.value = false
-      }
+      markCellsPath(1)
+    })
+  }
 
-      break
+  function animationVisited(): Promise<void> {
+    return new Promise((resolve) => {
+      function markCellsVisited(i: number) {
+        if (i < visited.value.length - 1) {
+          visited.value[i].htmlNode.classList.add('visited')
+          setTimeout(() => {
+            markCellsVisited(i + 1)
+          }, 10)
+        }
+        else {
+          resolve()
+        }
+      }
+      markCellsVisited(1)
+    })
+  }
+
+  return {
+    animationPath,
+    animationVisited,
+  }
+}
+
+const { clearPathAndVisited, clearForcePathAndVisited } = useClear()
+function useClear() {
+  function clearPath() {
+    const totalPath = path.value.length
+    if (totalPath > 0) {
+      for (let i = totalPath - 1; i > -1; i--) {
+        path.value[i].htmlNode.classList.remove('path')
+        path.value.splice(i, 1)
+      }
+    }
+  }
+  function clearVisited() {
+    const totalVisited = visited.value.length
+    if (totalVisited > 0) {
+      for (let i = totalVisited - 1; i > -1; i--) {
+        visited.value[i].htmlNode.classList.remove('visited')
+        visited.value.splice(i, 1)
+      }
+    }
+  }
+
+  function clearPathAndVisited() {
+    if (blockUserAction.value)
+      return
+    clearPath()
+    clearVisited()
+  }
+
+  function clearForcePathAndVisited() {
+    clearPath()
+    clearVisited()
+  }
+  return {
+    clearPath,
+    clearVisited,
+    clearPathAndVisited,
+    clearForcePathAndVisited,
   }
 }
 
@@ -132,8 +141,7 @@ function useHandleDragging() {
     }
     if (cellMoved.htmlNode.className.includes('end'))
       handleCellEndMove(itemData, targetInfos)
-
-    // clearVisited()
+    clearPathAndVisited()
   }
 
   function handleCellStartMove(itemData: { row: number, column: number }, targetInfos: { row: number, column: number }) {
@@ -199,6 +207,58 @@ function useHandleDragging() {
     handleDrop,
   }
 }
+async function startSearchAlgo(algo: string) {
+  clearForcePathAndVisited()
+  blockUserAction.value = true
+  switch (algo) {
+    case 'aStar':
+      try {
+        path.value = await aStarAlgo({
+          rows,
+          columns,
+          grid: graph,
+          start: startNode.value,
+          end: endNode.value,
+        })
+        await animationPath()
+      }
+      catch (error) {
+        console.error(error)
+      }
+      break
+    case 'dijkstra':
+      try {
+        const { shortest, allVisited } = dijkstraAlgo({
+          grid: graph.value,
+          startNode: startNode.value,
+          endNode: endNode.value,
+        })
+        path.value = shortest
+        visited.value = allVisited
+        await animationVisited()
+        await animationPath()
+        resetGraphAfterDijkstra()
+      }
+      catch (error) {
+
+      }
+      break
+  }
+  blockUserAction.value = false
+}
+
+function resetGraphAfterDijkstra() {
+  for (let i = 0; i < graph.value.length; i++) {
+    for (let y = 0; y < graph.value[i].length; y++) {
+      graph.value[i][y].distance = Number.POSITIVE_INFINITY
+      graph.value[i][y].isVisited = false
+      graph.value[i][y].previousNode = null
+      graph.value[i][y].f = 0
+      graph.value[i][y].g = 0
+      graph.value[i][y].h = 0
+    }
+  }
+}
 </script>
 
 <template>
@@ -209,35 +269,12 @@ function useHandleDragging() {
     <button @click="startSearchAlgo('aStar')">
       A* search algo
     </button>
-    <button @click="clearVisited()">
+    <button @click="startSearchAlgo('dijkstra')">
+      Dijkstra Algo
+    </button>
+    <button @click="clearPathAndVisited()">
       Clear visited path
     </button>
-
-    <!-- <button @click="randomizeStartAndEnd()">
-      Randomize start and end
-    </button> -->
-    <!--
-    <button @click="dijkstraAlgo()">
-      Dijkstra algo
-    </button>
-    <button @click="dfsAlgo()">
-      DFS algo
-    </button> -->
-  </div>
-  <div class="select-none">
-    <p>
-      {{ blockUserAction }}
-    </p>
-    <p>
-      {{ cellStartRow }}
-      -
-      {{ cellStartColumn }}
-    </p>
-    <p>
-      {{ cellEndRow }}
-      -
-      {{ cellEndColumn }}
-    </p>
   </div>
   <table class="flex justify-center flex-nowrap select-none">
     <tbody @touchstart="holdingTouch = true" @touchend="holdingTouch = false" @mouseup="holdingTouch = false" @mousedown="holdingTouch = true">
