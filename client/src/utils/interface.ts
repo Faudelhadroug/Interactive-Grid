@@ -32,3 +32,9 @@ export interface dijkstraArgs {
   startNode: Node
   endNode: Node
 }
+
+export interface dfsArgs {
+  grid: Node[][]
+  startNode: Node
+  endNode: Node
+}
