@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import type { ComputedRef, Ref } from 'vue'
 import {
   useChangeClassWall,
@@ -13,19 +13,30 @@ import type { Node } from '../utils/interface'
 import aStarAlgo from '../utils/algorithms/aStar.ts'
 import dijkstraAlgo from '../utils/algorithms/dijkstra.ts'
 import dfsAlgo from '../utils/algorithms/dfs'
+import GridParams from './GridParams.vue'
 
 const cells = ref()
-const { rows, columns, graph, baseCellStart, baseCellEnd } = useGridInformations(cells)
+const cellsMobile = ref()
+const height = ref(window.innerHeight)
+const width = ref(window.innerWidth)
+const graph: Ref<Node[][]> = ref([])
+
+const rows: Ref<number> = ref(width.value > 1279 ? 20 : 10)
+const columns: Ref<number> = ref(width.value > 1279 ? 40 : 20)
+
 const cellStartRow: Ref<number> = ref(1)
 const cellStartColumn: Ref<number> = ref(1)
 const cellEndRow: Ref<number> = ref(21)
 const cellEndColumn: Ref<number> = ref(21)
 
 onMounted(() => {
-  cellStartRow.value = baseCellStart.value!.row
-  cellStartColumn.value = baseCellStart.value!.col
-  cellEndRow.value = baseCellEnd.value!.row
-  cellEndColumn.value = baseCellEnd.value!.col
+  window.addEventListener('resize', updateDimensions)
+  const { grid, baseCellStart, baseCellEnd } = useGridInformations(width.value > 1279 ? cells : cellsMobile, { rowsGrid: rows, columnsGrid: columns })
+  updateChangementGrid(grid, baseCellStart, baseCellEnd)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateDimensions)
 })
 
 const startNode: ComputedRef<Node> = computed(() => {
@@ -217,8 +228,8 @@ async function startSearchAlgo(algo: string) {
     case 'aStar':
       try {
         path.value = await aStarAlgo({
-          rows,
-          columns,
+          rows: rows.value,
+          columns: columns.value,
           grid: graph,
           start: startNode.value,
           end: endNode.value,
@@ -242,7 +253,6 @@ async function startSearchAlgo(algo: string) {
         visited.value = allVisited
         await animationVisited()
         await animationPath()
-        console.log(shortest)
         if (shortest.length === 0)
           alert('no path possible')
         resetGraphAfterDijkstra()
@@ -264,7 +274,6 @@ async function startSearchAlgo(algo: string) {
         await animationPath()
         if (shortest.length === 0)
           alert('no path possible')
-        // resetGraphAfterDijkstra()
       }
       catch (error) {
         console.error(error)
@@ -273,7 +282,46 @@ async function startSearchAlgo(algo: string) {
   }
   blockUserAction.value = false
 }
+function updateChangementGrid(grid: Ref<Node[][]>, baseCellStart: Ref<Node | undefined>, baseCellEnd: Ref<Node | undefined>) {
+  graph.value = grid.value
+  cellStartRow.value = baseCellStart.value!.row
+  cellStartColumn.value = baseCellStart.value!.col
+  cellEndRow.value = baseCellEnd.value!.row
+  cellEndColumn.value = baseCellEnd.value!.col
+}
 
+function removeStartAndEnd() {
+  graph.value[cellStartRow.value][cellStartColumn.value].isStart = false
+  graph.value[cellStartRow.value][cellStartColumn.value].htmlNode.classList.remove('start')
+  graph.value[cellEndRow.value][cellEndColumn.value].isEnd = false
+  graph.value[cellEndRow.value][cellEndColumn.value].htmlNode.classList.remove('end')
+}
+function updateDimensions() {
+  width.value = window.innerWidth
+  height.value = window.innerHeight
+}
+
+watch(width, (newWidth, oldWidth) => {
+  if (newWidth < 1280 && oldWidth > 1279) {
+    clearForcePathAndVisited()
+    useClearWall()
+    removeStartAndEnd()
+    rows.value = 10
+    columns.value = 20
+    const { grid, baseCellStart, baseCellEnd } = useGridInformations(cellsMobile, { rowsGrid: rows, columnsGrid: columns })
+    updateChangementGrid(grid, baseCellStart, baseCellEnd)
+  }
+
+  if (newWidth > 1279 && oldWidth < 1280) {
+    clearForcePathAndVisited()
+    useClearWall()
+    removeStartAndEnd()
+    rows.value = 20
+    columns.value = 40
+    const { grid, baseCellStart, baseCellEnd } = useGridInformations(cells, { rowsGrid: rows, columnsGrid: columns })
+    updateChangementGrid(grid, baseCellStart, baseCellEnd)
+  }
+})
 function resetGraphAfterDijkstra() {
   for (let i = 0; i < graph.value.length; i++) {
     for (let y = 0; y < graph.value[i].length; y++) {
@@ -289,44 +337,94 @@ function resetGraphAfterDijkstra() {
 </script>
 
 <template>
-  <div class="bg-yellow-200 p-[1rem] space-x-[5rem] flex justify-center select-none">
-    <button @click="useClearWall()">
-      Clear all wall
-    </button>
-    <button @click="startSearchAlgo('aStar')">
-      A* search algo
-    </button>
-    <button @click="startSearchAlgo('dijkstra')">
-      Dijkstra Algo
-    </button>
-    <button @click="startSearchAlgo('dfs')">
-      DFS algo
-    </button>
-    <button @click="clearPathAndVisited()">
-      Clear visited path
-    </button>
+  <div class="bg-teal-950 text-teal-950 py-[1rem] xl:py-[2rem] h-screen">
+    <div class="flex justify-around md:justify-center md:space-x-[10rem] items-center xl:hidden pb-[1rem] bg-slate-100">
+      <GridParams />
+      <div class="flex flex-col justify-center items-center select-none bg-green-900 text-white rounded-md mt-[1rem]">
+        <p class="p-[1rem] ">
+          Clear options
+        </p>
+        <div class="space-y-[1rem] py-[1rem] flex flex-col justify-center items-center ">
+          <button class="bg-green-700 p-[1rem] rounded-xl" @click="useClearWall()">
+            All wall
+          </button>
+          <button class="bg-green-700 p-[1rem] rounded-xl" @click="clearPathAndVisited()">
+            Visited path
+          </button>
+        </div>
+      </div>
+    </div>
+    <table class="flex justify-center items-center select-none w-full pb-[1rem] px-[0.5rem] xl:py-[1rem] xl:pl-[4rem] bg-slate-100">
+      <tbody @touchstart="holdingTouch = true" @touchend="holdingTouch = false" @mouseup="holdingTouch = false" @mousedown="holdingTouch = true">
+        <tr v-for="row in 20" v-show="width > 1279" :id="`${row - 1}`" :key="`row-${row - 1}`">
+          <td
+            v-for="column in 40" :id="`${row - 1}-${column - 1}`"
+            :key="`${row}-${column}`"
+            ref="cells"
+            class="outline outline-1 w-[30px] h-[30px]"
+            :draggable="graph.length > 0 && width > 1279 ? graph[row - 1][column - 1].isStart || graph[row - 1][column - 1].isEnd ? true : false : false"
+            @mousedown="blockUserAction ? null : useChangeClassWall(row - 1, column - 1)"
+            @mouseover="blockUserAction ? null : useHandleClickHolding(row - 1, column - 1, holdingTouch)"
+            @dragstart="blockUserAction ? null : handleDragStart($event, row - 1, column - 1)"
+            @drop="blockUserAction ? null : handleDrop($event, row - 1, column - 1)"
+            @dragover.prevent
+          >
+            <!-- {{ column + (columns * (row - 1)) - 1 }} -->
+            <!-- {{ `${row - 1}-${column - 1}` }} -->
+          </td>
+        </tr>
+        <tr v-for="row in 10" v-show="width < 1280" :id="`${row - 1}`" :key="`rowMobile-${row - 1}`">
+          <td
+            v-for="column in 20" :id="`Mobile:${row - 1}-${column - 1}`"
+            :key="`${row}-${column}`"
+            ref="cellsMobile"
+            class="outline outline-1 w-[20px] h-[25px] sm:w-[30px] sm:h-[40px]"
+            :draggable="graph.length > 0 ? graph[row - 1][column - 1].isStart || graph[row - 1][column - 1].isEnd ? true : false : false"
+            @mousedown="blockUserAction ? null : useChangeClassWall(row - 1, column - 1)"
+            @mouseover="blockUserAction ? null : useHandleClickHolding(row - 1, column - 1, holdingTouch)"
+            @dragstart="blockUserAction ? null : handleDragStart($event, row - 1, column - 1)"
+            @drop="blockUserAction ? null : handleDrop($event, row - 1, column - 1)"
+            @dragover.prevent
+          >
+            <!-- {{ column + (columns * (row - 1)) - 1 }} -->
+            <!-- {{ `${row - 1}-${column - 1}` }} -->
+          </td>
+        </tr>
+      </tbody>
+      <div class="hidden xl:flex xl:flex-col xl:justify-center xl:items-center">
+        <GridParams />
+        <div class="flex flex-col justify-center items-center select-none bg-green-900 text-white rounded-md">
+          <p class="p-[1rem]">
+            Clear options
+          </p>
+          <div class="space-y-[1rem] py-[1rem] flex flex-col justify-center items-center ">
+            <button class="bg-green-700 p-[1rem] rounded-xl" @click="useClearWall()">
+              All wall
+            </button>
+            <button class="bg-green-700 p-[1rem] rounded-xl" @click="clearPathAndVisited()">
+              Visited path
+            </button>
+          </div>
+        </div>
+      </div>
+    </table>
+    <div class=" text-slate-200 space-x-[1rem] flex flex-wrap justify-center select-none  py-[1rem] bg-red-900 ">
+      <p class="p-[1rem] rounded-md">
+        Algorithms
+      </p>
+      <div class="flex space-x-[1rem]">
+        <button class="bg-red-700 p-[1rem] rounded-xl" @click="startSearchAlgo('aStar')">
+          A* search
+        </button>
+        <button class="bg-red-700 p-[1rem] rounded-xl" @click="startSearchAlgo('dijkstra')">
+          Dijkstra
+        </button>
+        <button class="bg-red-700 p-[1rem] rounded-xl" @click="startSearchAlgo('dfs')">
+          DFS
+        </button>
+      </div>
+    </div>
   </div>
-  <table class="flex justify-center flex-nowrap select-none">
-    <tbody @touchstart="holdingTouch = true" @touchend="holdingTouch = false" @mouseup="holdingTouch = false" @mousedown="holdingTouch = true">
-      <tr v-for="row in rows" :id="`${row - 1}`" :key="`row${row - 1}`">
-        <td
-          v-for="column in columns" :id="`${row - 1}-${column - 1}`"
-          :key="`${row}-${column}`"
-          ref="cells"
-          class="outline outline-1 w-[70px] md:w-[30px] h-[25px] md:h-[30px]"
-          :draggable="graph.length > 0 ? graph[row - 1][column - 1].isStart || graph[row - 1][column - 1].isEnd ? true : false : false"
-          @mousedown="blockUserAction ? null : useChangeClassWall(row - 1, column - 1)"
-          @mouseover="blockUserAction ? null : useHandleClickHolding(row - 1, column - 1, holdingTouch)"
-          @dragstart="blockUserAction ? null : handleDragStart($event, row - 1, column - 1)"
-          @drop="blockUserAction ? null : handleDrop($event, row - 1, column - 1)"
-          @dragover.prevent
-        >
-          <!-- {{ column + (columns * (row - 1)) - 1 }} -->
-          <!-- {{ `${row - 1}-${column - 1}` }} -->
-        </td><td />
-      </tr>
-    </tbody>
-  </table>
 </template>
 
 <style scoped>

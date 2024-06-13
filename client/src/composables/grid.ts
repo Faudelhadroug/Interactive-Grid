@@ -1,46 +1,41 @@
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import type { Ref } from 'vue'
 import type { CreateNode, Node } from '../utils/interface'
 
-const rows: number = 20
-const columns: number = 40
-
-const graph: Ref<Node[][]> = ref([])
+const grid: Ref<Node[][]> = ref([])
 const cellsWithWall: Ref<Node[]> = ref([])
+const rows: Ref<number> = ref(20)
+const columns: Ref<number> = ref(40)
 
 export function useCalculCell(rowNb: number, columnNb: number): number {
-  return columnNb + (columns * (rowNb - 1)) - 1
+  return columnNb + (columns.value * (rowNb - 1)) - 1
 }
-export function useGridInformations(cells: Ref<HTMLElement[]>) {
+export function updateGridInformation() {
+
+}
+export function useGridInformations(cells: Ref<HTMLElement[]>, { rowsGrid, columnsGrid }: { rowsGrid: Ref<number>, columnsGrid: Ref<number> }) {
   const baseCellStart: Ref<undefined | Node> = ref(undefined)
   const baseCellEnd: Ref<undefined | Node> = ref(undefined)
+  rows.value = rowsGrid.value
+  columns.value = columnsGrid.value
 
-  onMounted(() => {
-    const { start, end } = initStartAndEnd(cells)
-    baseCellStart.value = start
-    baseCellEnd.value = end
-  })
+  const { start, end } = initStartAndEnd(cells)
+  baseCellStart.value = start
+  baseCellEnd.value = end
 
   return {
-    rows,
-    columns,
-    graph,
+    grid,
     baseCellStart,
     baseCellEnd,
   }
 }
 
 function initStartAndEnd(cells: Ref<HTMLElement[]>) {
-  const { randomStart, randomEnd } = generateRandomStartAndEnd()
-  const randomStartRow = Number(randomStart.split('-')[0])
-  const randomStartColumn = Number(randomStart.split('-')[1])
-
-  const randomEndRow = Number(randomEnd.split('-')[0])
-  const randomEndColumn = Number(randomEnd.split('-')[1])
-
-  for (let i = 1; i < rows + 1; i++) {
+  const { randomStartRow, randomStartColumn, randomEndRow, randomEndColumn } = generateRandomStartAndEnd()
+  grid.value.length = 0
+  for (let i = 1; i < rows.value + 1; i++) {
     const currentRow: Node[] = []
-    for (let j = 1; j < columns + 1; j++) {
+    for (let j = 1; j < columns.value + 1; j++) {
       const row = i
       const column = j
       const nbCell = useCalculCell(row, column)
@@ -48,31 +43,29 @@ function initStartAndEnd(cells: Ref<HTMLElement[]>) {
       //* -1 Because we start iteration at 1 instead of 0, and we want that to avoid * by 0
       currentRow.push(createNode({ row: row - 1, col: column - 1, isWall: elementNode.className.includes('wall'), htmlNode: elementNode, isStart: false, isEnd: false }))
     }
-    graph.value.push(currentRow)
+    grid.value.push(currentRow)
   }
 
-  graph.value[randomStartRow][randomStartColumn].isStart = true
-  graph.value[randomStartRow][randomStartColumn].htmlNode.classList.add('start')
+  grid.value[randomStartRow][randomStartColumn].isStart = true
+  grid.value[randomStartRow][randomStartColumn].htmlNode.classList.add('start')
 
-  graph.value[randomEndRow][randomEndColumn].isEnd = true
-  graph.value[randomEndRow][randomEndColumn].htmlNode.classList.add('end')
+  grid.value[randomEndRow][randomEndColumn].isEnd = true
+  grid.value[randomEndRow][randomEndColumn].htmlNode.classList.add('end')
 
-  return { start: graph.value[randomStartRow][randomStartColumn], end: graph.value[randomEndRow][randomEndColumn] }
+  return { start: grid.value[randomStartRow][randomStartColumn], end: grid.value[randomEndRow][randomEndColumn] }
 }
 function generateRandomStartAndEnd() {
   const min: number = 1
   const areaDivisionStart: number = 4
-  const randomStartRow = Math.floor(Math.random() * (rows - min) + min)
-  const randomStartColumn = Math.floor(Math.random() * (columns / areaDivisionStart - min) + min)
+  const randomStartRow = Math.floor(Math.random() * (rows.value - min) + min)
+  const randomStartColumn = Math.floor(Math.random() * (columns.value / areaDivisionStart - min) + min)
 
   const areaDivisionEnd: number = 2
-  const minEnd = columns / areaDivisionEnd
-  const randomEndRow = Math.floor(Math.random() * (rows - min) + min)
-  const randomEndColumn = Math.floor(Math.random() * (columns - minEnd) + minEnd)
+  const minEnd = columns.value / areaDivisionEnd
+  const randomEndRow = Math.floor(Math.random() * (rows.value - min) + min)
+  const randomEndColumn = Math.floor(Math.random() * (columns.value - minEnd) + minEnd)
 
-  const randomStart = `${randomStartRow}-${randomStartColumn}`
-  const randomEnd = `${randomEndRow}-${randomEndColumn}`
-  return { randomStart, randomEnd }
+  return { randomStartRow, randomStartColumn, randomEndRow, randomEndColumn }
 }
 
 function createNode({ row, col, isWall = false, htmlNode, isStart = false, isEnd = false }: CreateNode): Node {
@@ -94,8 +87,8 @@ function createNode({ row, col, isWall = false, htmlNode, isStart = false, isEnd
 }
 
 export function useChangeClassWall(row: number, column: number): void {
-  const cell = graph.value[row][column]
-  const cellHTML = graph.value[row][column].htmlNode
+  const cell = grid.value[row][column]
+  const cellHTML = grid.value[row][column].htmlNode
   if (cellHTML.className.includes('start') || cellHTML.className.includes('end') || cellHTML.className.includes('visited'))
     return
   if (cellHTML.className.includes('wall')) {
@@ -119,7 +112,7 @@ export function useReplaceWallClassName(element: HTMLElement, nameOfClass: strin
 export function useClearWall() {
   const totalWall = cellsWithWall.value.length
   for (let i = totalWall - 1; i > -1; i--) {
-    graph.value[cellsWithWall.value[i].row][cellsWithWall.value[i].col].isWall = false
+    grid.value[cellsWithWall.value[i].row][cellsWithWall.value[i].col].isWall = false
     cellsWithWall.value[i].htmlNode.classList.remove('wall')
     cellsWithWall.value.splice(i, 1)
   }
