@@ -16,19 +16,7 @@ import Grid from './components/Grid.vue'
   background-color: rgb(38, 161, 206);
 }
 .wall {
-  animation: wall-animation 0.4s ease-in normal;
   background-color: rgb(38, 161, 206);
-}
-@keyframes wall-animation {
-  0% {
-    transform: scale(.1)
-  }
-  50% {
-    transform: scale(0.7)
-  }
-  100% {
-    transform: scale(1)
-  }
 }
 .start-bg {
   background-color: rgb(242, 113, 28);
