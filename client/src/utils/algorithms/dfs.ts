@@ -1,28 +1,25 @@
 import type { Node, dfsArgs } from '../interface'
 
 export default function dfsAlgo({ grid, startNode, endNode }: dfsArgs): any {
-  const stack = [startNode]
-  const visitedSet = new Set()
-  const result: Node[] = []
-  const neighborsStart = getNeighbors(startNode, grid)
-  while (stack.length) {
-    const vertex = stack.pop()
-    if (!visitedSet.has(vertex) && vertex?.isWall === false) {
-      if (neighborsStart.includes(vertex))
-        result.length = 1
-      visitedSet.add(vertex)
-      result.push(vertex)
-      if (vertex === endNode)
-        break
-      const neighbors = getNeighbors(vertex, grid)
-      for (const neighbor of neighbors)
-        stack.push(neighbor)
+  const stack: Array<{ node: Node, path: Node[] }> = [{ node: startNode, path: [] }]
+  const visitedMap = new Map<Node, Node | null>()
+
+  while (stack.length > 0) {
+    const { node, path } = stack.pop()!
+    if (!visitedMap.has(node) && node?.isWall === false) {
+      visitedMap.set(node, null)
+      path.push(node)
+      if (node === endNode)
+        return { shortest: path, allVisited: Array.from(visitedMap.keys()) }
+      const neighbors = getNeighbors(node, grid)
+      for (const neighbor of neighbors) {
+        if (!visitedMap.has(neighbor))
+          stack.push({ node: neighbor, path: [...path] })
+      }
     }
-    if (stack.length === 0 && !vertex?.isEnd)
-      return { shortest: [], allVisited: Array.from(visitedSet) }
   }
 
-  return { shortest: result, allVisited: Array.from(visitedSet) }
+  return { shortest: [], allVisited: Array.from(visitedMap.keys()) }
 }
 
 function getNeighbors(node: Node, grid: Node[][]) {
