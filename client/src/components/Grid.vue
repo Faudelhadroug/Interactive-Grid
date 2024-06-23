@@ -57,7 +57,7 @@ const path: Ref<Node[] | []> = ref([])
 const visited: Ref<Node[] | []> = ref([])
 
 const holdingTouch = ref(false)
-const blockUserAction = ref(false)
+const blockUserActions = ref(false)
 
 function useModal() {
   const closeInfoModal = ref(true)
@@ -184,7 +184,7 @@ function useClear() {
   }
 
   function clearPathAndVisited() {
-    if (blockUserAction.value)
+    if (blockUserActions.value)
       return
     clearPath()
     clearVisited()
@@ -288,10 +288,10 @@ function useHandleDragging() {
   }
 }
 async function startSearchAlgo(algo: string) {
-  if (blockUserAction.value)
+  if (blockUserActions.value)
     return
   clearForcePathAndVisited()
-  blockUserAction.value = true
+  blockUserActions.value = true
   switch (algo) {
     case 'aStar':
       try {
@@ -348,7 +348,7 @@ async function startSearchAlgo(algo: string) {
       }
       break
   }
-  blockUserAction.value = false
+  blockUserActions.value = false
 }
 function updateChangementGrid(grid: Ref<Node[][]>, baseCellStart: Ref<Node | undefined>, baseCellEnd: Ref<Node | undefined>) {
   graph.value = grid.value
@@ -496,7 +496,7 @@ function resetGraphAfterDijkstra() {
           Grid Reset Option
         </p>
         <div class="space-y-[1rem] py-[1rem] flex flex-col justify-center items-center ">
-          <button class="bg-green-700 p-[1rem] rounded-xl" @click="useClearWall()">
+          <button class="bg-green-700 p-[1rem] rounded-xl" @click="blockUserActions ? null : useClearWall()">
             All wall
           </button>
           <button class="bg-green-700 p-[1rem] rounded-xl" @click="clearPathAndVisited()">
@@ -514,10 +514,10 @@ function resetGraphAfterDijkstra() {
             ref="cells"
             class="outline outline-1 w-[30px] h-[30px] cursor-pointer"
             :draggable="graph.length > 0 && width > 1279 ? graph[row - 1][column - 1].isStart || graph[row - 1][column - 1].isEnd ? true : false : false"
-            @mousedown="blockUserAction ? null : useChangeClassWall(row - 1, column - 1)"
-            @mouseover="blockUserAction ? null : useHandleClickHolding(row - 1, column - 1, holdingTouch)"
-            @dragstart="blockUserAction ? null : handleDragStart($event, row - 1, column - 1)"
-            @drop="blockUserAction ? null : handleDrop($event, row - 1, column - 1)"
+            @mousedown="blockUserActions ? null : useChangeClassWall(row - 1, column - 1)"
+            @mouseover="blockUserActions ? null : useHandleClickHolding(row - 1, column - 1, holdingTouch)"
+            @dragstart="blockUserActions ? null : handleDragStart($event, row - 1, column - 1)"
+            @drop="blockUserActions ? null : handleDrop($event, row - 1, column - 1)"
             @dragover.prevent
           >
             <!-- {{ column + (columns * (row - 1)) - 1 }} -->
@@ -531,10 +531,10 @@ function resetGraphAfterDijkstra() {
             ref="cellsMobile"
             class="outline outline-1 w-[20px] h-[25px] sm:w-[30px] sm:h-[40px] cursor-pointer"
             :draggable="graph.length > 0 ? graph[row - 1][column - 1].isStart || graph[row - 1][column - 1].isEnd ? true : false : false"
-            @mousedown="blockUserAction ? null : useChangeClassWall(row - 1, column - 1)"
-            @mouseover="blockUserAction ? null : useHandleClickHolding(row - 1, column - 1, holdingTouch)"
-            @dragstart="blockUserAction ? null : handleDragStart($event, row - 1, column - 1)"
-            @drop="blockUserAction ? null : handleDrop($event, row - 1, column - 1)"
+            @mousedown="blockUserActions ? null : useChangeClassWall(row - 1, column - 1)"
+            @mouseover="blockUserActions ? null : useHandleClickHolding(row - 1, column - 1, holdingTouch)"
+            @dragstart="blockUserActions ? null : handleDragStart($event, row - 1, column - 1)"
+            @drop="blockUserActions ? null : handleDrop($event, row - 1, column - 1)"
             @dragover.prevent
           >
             <!-- {{ column + (columns * (row - 1)) - 1 }} -->
@@ -549,7 +549,7 @@ function resetGraphAfterDijkstra() {
             Grid Reset Option
           </p>
           <div class="space-y-[1rem] py-[1rem] flex flex-col justify-center items-center ">
-            <button class="bg-green-700 p-[1rem] rounded-xl" @click="useClearWall()">
+            <button class="bg-green-700 p-[1rem] rounded-xl" @click="blockUserActions ? null : useClearWall()">
               All wall
             </button>
             <button class="bg-green-700 p-[1rem] rounded-xl" @click="clearPathAndVisited()">
