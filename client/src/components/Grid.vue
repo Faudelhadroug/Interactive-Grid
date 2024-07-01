@@ -559,20 +559,37 @@ function resetGraphAfterDijkstra() {
         </div>
       </div>
     </table>
-    <div class=" text-slate-200 space-x-[1rem] flex flex-wrap justify-center select-none  py-[1rem] bg-red-900 ">
-      <p class="p-[1rem] rounded-md">
-        Algorithms
-      </p>
-      <div class="flex space-x-[1rem]">
-        <button class="bg-red-700 p-[1rem] rounded-xl" @click="startSearchAlgo('aStar')">
-          A* search
-        </button>
-        <button class="bg-red-700 p-[1rem] rounded-xl" @click="startSearchAlgo('dijkstra')">
-          Dijkstra
-        </button>
-        <button class="bg-red-700 p-[1rem] rounded-xl" @click="startSearchAlgo('dfs')">
-          DFS
-        </button>
+    <div class=" text-slate-200 select-none bg-red-950">
+      <div class="flex flex-wrap justify-center bg-red-900 py-[1rem]">
+        <p class="p-[1rem] rounded-md">
+          Algorithms
+        </p>
+        <div class="flex space-x-[1rem]">
+          <button class="bg-red-700 p-[1rem] rounded-xl" @click="startSearchAlgo('aStar')">
+            A* search
+          </button>
+          <button class="bg-red-700 p-[1rem] rounded-xl" @click="startSearchAlgo('dijkstra')">
+            Dijkstra
+          </button>
+          <button class="bg-red-700 p-[1rem] rounded-xl" @click="startSearchAlgo('dfs')">
+            DFS
+          </button>
+        </div>
+      </div>
+      <div class="mt-[2rem] space-y-[2rem] p-[2rem]">
+        <h2 class="text-4xl font-bold pb-[1rem]">Algorithms details</h2> 
+        <div>
+          <h3 class="font-bold text-2xl">A* search:</h3>
+          <p>Starting from a specific starting node of a graph, it aims to find a path to the given goal node having the smallest cost (least distance travelled, shortest time, etc.). It does this by maintaining a tree of paths originating at the start node and extending those paths one edge at a time until the goal node is reached.<a href="https://en.wikipedia.org/wiki/A*_search_algorithm" target="_blank" class="underline"> Find more informations about this algorithm.</a></p>
+        </div>
+        <div>
+          <h3 class="font-bold text-2xl">Dijkstra:</h3>
+          <p>Dijkstra's algorithm to find the shortest path between a and b. It picks the unvisited vertex with the lowest distance, calculates the distance through it to each unvisited neighbor, and updates the neighbor's distance if smaller.<a href="https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm" target="_blank" class="underline"> Find more informations about this algorithm.</a></p>
+        </div>
+        <div>
+          <h3 class="font-bold text-2xl">Depth-first search (DFS):</h3>
+          <p>The algorithm explores as far as possible along each branch before backtracking. Extra memory, usually a stack, is needed to keep track of the nodes discovered so far along a specified branch which helps in backtracking of the graph.<a href="https://en.wikipedia.org/wiki/Depth-first_search" target="_blank" class="underline"> Find more informations about this algorithm.</a></p>
+        </div>
       </div>
     </div>
   </div>
